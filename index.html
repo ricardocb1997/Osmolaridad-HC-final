@@ -28,7 +28,7 @@
   }
 
   .wrap{
-    max-width:980px;
+    max-width:960px;
     margin:20px auto;
     padding:10px;
   }
@@ -58,7 +58,7 @@
     margin-bottom:4px;
   }
 
-  input, select{
+  input{
     width:100%;
     padding:9px 10px;
     margin-top:4px;
@@ -119,52 +119,21 @@
   }
 
   .helper{
-    font-size:0.83rem;
-    line-height:1.45;
+    font-size:0.84rem;
+    line-height:1.5;
     color:var(--muted);
     background:var(--soft);
     border:1px solid var(--border);
     border-radius:10px;
     padding:10px 12px;
-    margin:6px 0 14px 0;
-  }
-
-  .advanced{
-    margin-top:12px;
-    padding:14px;
-    border:1px solid var(--border);
-    border-radius:12px;
-    background:#fbfcfd;
-  }
-
-  .advanced h3{
-    margin:0 0 6px 0;
-    font-size:0.92rem;
-    font-weight:700;
-    color:var(--text);
-  }
-
-  .advanced p{
-    margin:0 0 10px 0;
-    font-size:0.8rem;
-    line-height:1.45;
-    color:var(--muted);
-  }
-
-  .advanced .row input{
-    font-size:0.88rem;
-    padding:8px 9px;
-  }
-
-  .small-label{
-    font-size:0.78rem;
+    margin-top:6px;
   }
 
   .risk{
     margin-top:14px;
     font-size:0.92rem;
     color:var(--muted);
-    line-height:1.45;
+    line-height:1.5;
   }
 </style>
 </head>
@@ -205,69 +174,8 @@
         </div>
       </div>
 
-      <div class="row">
-        <div>
-          <label>Tipo de mezcla</label>
-          <select id="mixPreset">
-            <option value="manual">Personalizada</option>
-            <option value="55">Glucosa / Fructosa (k ≈ 55)</option>
-            <option value="40">Malto / Fructosa (k ≈ 40)</option>
-            <option value="28">Maltodextrina (k ≈ 28)</option>
-            <option value="10">HBCD / amilopectina (k ≈ 10)</option>
-          </select>
-        </div>
-        <div>
-          <label>k efectivo de mezcla</label>
-          <input type="number" id="kEff" value="40" step="1">
-        </div>
-        <div>
-          <label>Modo de cálculo</label>
-          <select id="calcMode">
-            <option value="individual">Por carbohidrato individual</option>
-            <option value="effective">Por k efectivo de mezcla</option>
-          </select>
-        </div>
-      </div>
-
       <div class="helper">
-        Introduce la composición de la bebida y el volumen final. Puedes calcular la osmolaridad a partir de cada carbohidrato por separado o usar un <strong>k efectivo</strong> para estimar el comportamiento global de la mezcla.
-      </div>
-
-      <div class="advanced">
-        <h3>Coeficientes y umbrales (opcional)</h3>
-        <p>
-          Los valores mostrados a continuación corresponden a referencias habituales utilizadas para este tipo de estimaciones. En la mayoría de los casos <strong>no es necesario modificarlos</strong>, salvo que quieras ajustar el cálculo a un criterio específico o a una formulación concreta.
-        </p>
-
-        <div class="row">
-          <div>
-            <label class="small-label">k Glucosa</label>
-            <input type="number" id="kG" value="55" step="1">
-          </div>
-          <div>
-            <label class="small-label">k Fructosa</label>
-            <input type="number" id="kF" value="55" step="1">
-          </div>
-          <div>
-            <label class="small-label">k Maltodextrina</label>
-            <input type="number" id="kM" value="28" step="1">
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label class="small-label">k Sacarosa</label>
-            <input type="number" id="kS" value="55" step="1">
-          </div>
-          <div>
-            <label class="small-label">Límite hipotónica</label>
-            <input type="number" id="isoL" value="200" step="1">
-          </div>
-          <div>
-            <label class="small-label">Límite hipertónica</label>
-            <input type="number" id="isoH" value="295" step="1">
-          </div>
-        </div>
+        Introduce la composición final de la bebida. La calculadora estima automáticamente la <strong>k efectiva de la mezcla</strong> a partir del tipo y proporción de carbohidratos, sin necesidad de ajustes manuales.
       </div>
     </div>
 
@@ -285,8 +193,7 @@
 
       <div class="divider"></div>
 
-      <div class="kpi"><span>Método utilizado</span><span id="methodUsed">—</span></div>
-      <div class="kpi"><span>k aplicado</span><span id="kUsed">—</span></div>
+      <div class="kpi"><span>k efectiva de la mezcla</span><span id="kEff">—</span></div>
 
       <div class="risk">
         <strong>Interpretación:</strong> <span id="risk">—</span>
@@ -301,78 +208,62 @@ function v(id){
   return parseFloat(document.getElementById(id).value) || 0;
 }
 
-function syncPreset(){
-  const preset = document.getElementById('mixPreset').value;
-  if(preset !== "manual"){
-    document.getElementById('kEff').value = preset;
-  }
-}
-
 function calcular(){
-  const gG = v('glu');
-  const gF = v('fru');
-  const gM = v('mal');
-  const gS = v('suc');
-  const Na = v('na');
-  const V  = Math.max(v('vol'), 0.1);
+  const gG = Math.max(0, v('glu'));
+  const gF = Math.max(0, v('fru'));
+  const gM = Math.max(0, v('mal'));
+  const gS = Math.max(0, v('suc'));
+  const Na = Math.max(0, v('na'));
+  const V  = Math.max(0.1, v('vol'));
 
-  const kG = v('kG');
-  const kF = v('kF');
-  const kM = v('kM');
-  const kS = v('kS');
+  // Coeficientes de referencia
+  const kG = 55;
+  const kF = 55;
+  const kM = 28;
+  const kS = 55;
 
-  const isoL = v('isoL');
-  const isoH = v('isoH');
+  // Umbrales de clasificación
+  const isoL = 200;
+  const isoH = 295;
 
-  const calcMode = document.getElementById('calcMode').value;
-  const kEff = v('kEff');
+  const gTotal = gG + gF + gM + gS;
+  const gPerL = gTotal / V;
+  const pctCHO = gPerL / 10;
 
   const pctG = gG / (10 * V);
   const pctF = gF / (10 * V);
   const pctM = gM / (10 * V);
   const pctS = gS / (10 * V);
 
-  const gTotal = gG + gF + gM + gS;
-  const gPerL = gTotal / V;
-  const pctCHO = gPerL / 10;
-
-  let osmCHO = 0;
-  let methodUsed = "";
-  let kUsed = "";
-
-  if(calcMode === "effective"){
-    osmCHO = pctCHO * kEff;
-    methodUsed = "k efectivo de mezcla";
-    kUsed = kEff.toFixed(0);
-  } else {
-    osmCHO = pctG*kG + pctF*kF + pctM*kM + pctS*kS;
-    methodUsed = "carbohidratos individuales";
-    kUsed = "Variable según composición";
-  }
-
+  const osmCHO = pctG*kG + pctF*kF + pctM*kM + pctS*kS;
   const osmNa = 2 * (Na / 23);
   const osmTot = osmCHO + osmNa;
+
+  let kEff = 0;
+  if (gTotal > 0){
+    kEff = ((gG*kG) + (gF*kF) + (gM*kM) + (gS*kS)) / gTotal;
+  }
 
   let clasif = "Isotónica";
   let color = "amber";
 
-  if(osmTot < isoL){
+  if (osmTot < isoL){
     clasif = "Hipotónica";
     color = "green";
-  } else if(osmTot > isoH){
+  } else if (osmTot > isoH){
     clasif = "Hipertónica";
     color = "red";
   }
 
   let riesgo = "";
-  if(osmTot > isoH){
+  if (osmTot > isoH){
     riesgo = "La bebida presenta una concentración elevada y puede aumentar el riesgo de vaciado gástrico lento o molestias gastrointestinales, especialmente si se utiliza como única fuente de hidratación.";
-  } else if(osmTot < isoL && Na < 300){
-    riesgo = "La bebida es muy diluida y con bajo contenido de sodio. En esfuerzos prolongados conviene valorar un mayor aporte de sodio para reducir el riesgo de desajuste hídrico.";
-  } else if(osmTot < isoL){
-    riesgo = "La bebida favorece la hidratación y el vaciado gástrico, aunque puede aportar menos energía por unidad de volumen.";
+  } else if (osmTot < isoL && Na < 300){
+    riesgo = "La bebida es muy diluida y con bajo contenido de sodio. En esfuerzos prolongados puede ser conveniente aumentar el sodio para mejorar el equilibrio hídrico.";
+  } else if (osmTot < isoL){
+    riesgo = "La formulación favorece la hidratación y el vaciado gástrico, aunque puede aportar menos energía por unidad de volumen.";
   } else {
-    riesgo = "La formulación se sitúa en un rango habitualmente bien tolerado y equilibrado entre aporte hídrico y energético.";
+    riesgo = "La bebida se sitúa en un rango habitualmente equilibrado entre aporte hídrico y aporte energético.";
   }
 
   document.getElementById('osm').textContent = osmTot.toFixed(0) + " mOsm/L";
@@ -380,23 +271,15 @@ function calcular(){
   document.getElementById('gpl').textContent = Math.round(gPerL) + " g/L";
   document.getElementById('osmCHO').textContent = osmCHO.toFixed(0) + " mOsm/L";
   document.getElementById('osmNa').textContent = osmNa.toFixed(0) + " mOsm/L";
+  document.getElementById('kEff').textContent = gTotal > 0 ? kEff.toFixed(1) : "—";
   document.getElementById('risk').textContent = riesgo;
-  document.getElementById('methodUsed').textContent = methodUsed;
-  document.getElementById('kUsed').textContent = kUsed;
 
   const badge = document.getElementById('badge');
   badge.textContent = clasif;
   badge.className = "badge " + color;
 }
 
-document.getElementById('mixPreset').addEventListener('change', function(){
-  syncPreset();
-  calcular();
-});
-
 document.addEventListener('input', calcular);
-
-syncPreset();
 calcular();
 </script>
 
