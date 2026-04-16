@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Calculadora de Osmolaridad</title>
+
+<style>
+  :root{
+    --bg:#f5f7fa;
+    --card:#ffffff;
+    --text:#1f2933;
+    --muted:#6b7280;
+    --border:#e5e7eb;
+    --green:#1f8a70;
+    --amber:#d4a106;
+    --red:#b3261e;
+    --soft:#f9fafb;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--bg);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color:var(--text);
+  }
+
+  .wrap{
+    max-width:980px;
+    margin:20px auto;
+    padding:10px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+
+  @media (max-width: 760px){
+    .grid{grid-template-columns:1fr;}
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px;
+    box-shadow:0 4px 14px rgba(15,23,42,0.04);
+  }
+
+  label{
+    font-size:0.86rem;
+    color:var(--muted);
+    display:block;
+    margin-bottom:4px;
+  }
+
+  input, select{
+    width:100%;
+    padding:9px 10px;
+    margin-top:4px;
+    margin-bottom:8px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#fff;
+    color:var(--text);
+    font-size:0.95rem;
+  }
+
+  .row{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+  }
+
+  @media (max-width: 620px){
+    .row{grid-template-columns:1fr;}
+  }
+
+  .kpi{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    margin:8px 0;
+    font-size:0.98rem;
+  }
+
+  .kpi span:last-child{
+    font-weight:600;
+    text-align:right;
+  }
+
+  .badge{
+    padding:5px 10px;
+    border-radius:999px;
+    font-weight:600;
+    font-size:0.88rem;
+  }
+
+  .green{background:#d1fae5;color:#065f46;}
+  .amber{background:#fef3c7;color:#92400e;}
+  .red{background:#fee2e2;color:#7f1d1d;}
+
+  .section-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+  }
+
+  .divider{
+    height:1px;
+    background:var(--border);
+    margin:12px 0;
+  }
+
+  .helper{
+    font-size:0.83rem;
+    line-height:1.45;
+    color:var(--muted);
+    background:var(--soft);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 12px;
+    margin:6px 0 14px 0;
+  }
+
+  .advanced{
+    margin-top:12px;
+    padding:14px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:#fbfcfd;
+  }
+
+  .advanced h3{
+    margin:0 0 6px 0;
+    font-size:0.92rem;
+    font-weight:700;
+    color:var(--text);
+  }
+
+  .advanced p{
+    margin:0 0 10px 0;
+    font-size:0.8rem;
+    line-height:1.45;
+    color:var(--muted);
+  }
+
+  .advanced .row input{
+    font-size:0.88rem;
+    padding:8px 9px;
+  }
+
+  .small-label{
+    font-size:0.78rem;
+  }
+
+  .risk{
+    margin-top:14px;
+    font-size:0.92rem;
+    color:var(--muted);
+    line-height:1.45;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+  <div class="grid">
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>Glucosa (g)</label>
+          <input type="number" id="glu" value="40" min="0" step="1">
+        </div>
+        <div>
+          <label>Fructosa (g)</label>
+          <input type="number" id="fru" value="20" min="0" step="1">
+        </div>
+        <div>
+          <label>Maltodextrina (g)</label>
+          <input type="number" id="mal" value="40" min="0" step="1">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Sacarosa (g)</label>
+          <input type="number" id="suc" value="0" min="0" step="1">
+        </div>
+        <div>
+          <label>Sodio (mg/L)</label>
+          <input type="number" id="na" value="500" min="0" step="25">
+        </div>
+        <div>
+          <label>Volumen final (L)</label>
+          <input type="number" id="vol" value="1" min="0.1" step="0.1">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Tipo de mezcla</label>
+          <select id="mixPreset">
+            <option value="manual">Personalizada</option>
+            <option value="55">Glucosa / Fructosa (k ≈ 55)</option>
+            <option value="40">Malto / Fructosa (k ≈ 40)</option>
+            <option value="28">Maltodextrina (k ≈ 28)</option>
+            <option value="10">HBCD / amilopectina (k ≈ 10)</option>
+          </select>
+        </div>
+        <div>
+          <label>k efectivo de mezcla</label>
+          <input type="number" id="kEff" value="40" step="1">
+        </div>
+        <div>
+          <label>Modo de cálculo</label>
+          <select id="calcMode">
+            <option value="individual">Por carbohidrato individual</option>
+            <option value="effective">Por k efectivo de mezcla</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="helper">
+        Introduce la composición de la bebida y el volumen final. Puedes calcular la osmolaridad a partir de cada carbohidrato por separado o usar un <strong>k efectivo</strong> para estimar el comportamiento global de la mezcla.
+      </div>
+
+      <div class="advanced">
+        <h3>Coeficientes y umbrales (opcional)</h3>
+        <p>
+          Los valores mostrados a continuación corresponden a referencias habituales utilizadas para este tipo de estimaciones. En la mayoría de los casos <strong>no es necesario modificarlos</strong>, salvo que quieras ajustar el cálculo a un criterio específico o a una formulación concreta.
+        </p>
+
+        <div class="row">
+          <div>
+            <label class="small-label">k Glucosa</label>
+            <input type="number" id="kG" value="55" step="1">
+          </div>
+          <div>
+            <label class="small-label">k Fructosa</label>
+            <input type="number" id="kF" value="55" step="1">
+          </div>
+          <div>
+            <label class="small-label">k Maltodextrina</label>
+            <input type="number" id="kM" value="28" step="1">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label class="small-label">k Sacarosa</label>
+            <input type="number" id="kS" value="55" step="1">
+          </div>
+          <div>
+            <label class="small-label">Límite hipotónica</label>
+            <input type="number" id="isoL" value="200" step="1">
+          </div>
+          <div>
+            <label class="small-label">Límite hipertónica</label>
+            <input type="number" id="isoH" value="295" step="1">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">
+        <strong>Resultados</strong>
+        <span id="badge" class="badge amber">Isotónica</span>
+      </div>
+
+      <div class="kpi"><span>Osmolaridad total</span><span id="osm">—</span></div>
+      <div class="kpi"><span>Concentración total de CHO</span><span id="pct">—</span></div>
+      <div class="kpi"><span>Carbohidratos por litro</span><span id="gpl">—</span></div>
+      <div class="kpi"><span>Osmolaridad de CHO</span><span id="osmCHO">—</span></div>
+      <div class="kpi"><span>Osmolaridad de sodio</span><span id="osmNa">—</span></div>
+
+      <div class="divider"></div>
+
+      <div class="kpi"><span>Método utilizado</span><span id="methodUsed">—</span></div>
+      <div class="kpi"><span>k aplicado</span><span id="kUsed">—</span></div>
+
+      <div class="risk">
+        <strong>Interpretación:</strong> <span id="risk">—</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function v(id){
+  return parseFloat(document.getElementById(id).value) || 0;
+}
+
+function syncPreset(){
+  const preset = document.getElementById('mixPreset').value;
+  if(preset !== "manual"){
+    document.getElementById('kEff').value = preset;
+  }
+}
+
+function calcular(){
+  const gG = v('glu');
+  const gF = v('fru');
+  const gM = v('mal');
+  const gS = v('suc');
+  const Na = v('na');
+  const V  = Math.max(v('vol'), 0.1);
+
+  const kG = v('kG');
+  const kF = v('kF');
+  const kM = v('kM');
+  const kS = v('kS');
+
+  const isoL = v('isoL');
+  const isoH = v('isoH');
+
+  const calcMode = document.getElementById('calcMode').value;
+  const kEff = v('kEff');
+
+  const pctG = gG / (10 * V);
+  const pctF = gF / (10 * V);
+  const pctM = gM / (10 * V);
+  const pctS = gS / (10 * V);
+
+  const gTotal = gG + gF + gM + gS;
+  const gPerL = gTotal / V;
+  const pctCHO = gPerL / 10;
+
+  let osmCHO = 0;
+  let methodUsed = "";
+  let kUsed = "";
+
+  if(calcMode === "effective"){
+    osmCHO = pctCHO * kEff;
+    methodUsed = "k efectivo de mezcla";
+    kUsed = kEff.toFixed(0);
+  } else {
+    osmCHO = pctG*kG + pctF*kF + pctM*kM + pctS*kS;
+    methodUsed = "carbohidratos individuales";
+    kUsed = "Variable según composición";
+  }
+
+  const osmNa = 2 * (Na / 23);
+  const osmTot = osmCHO + osmNa;
+
+  let clasif = "Isotónica";
+  let color = "amber";
+
+  if(osmTot < isoL){
+    clasif = "Hipotónica";
+    color = "green";
+  } else if(osmTot > isoH){
+    clasif = "Hipertónica";
+    color = "red";
+  }
+
+  let riesgo = "";
+  if(osmTot > isoH){
+    riesgo = "La bebida presenta una concentración elevada y puede aumentar el riesgo de vaciado gástrico lento o molestias gastrointestinales, especialmente si se utiliza como única fuente de hidratación.";
+  } else if(osmTot < isoL && Na < 300){
+    riesgo = "La bebida es muy diluida y con bajo contenido de sodio. En esfuerzos prolongados conviene valorar un mayor aporte de sodio para reducir el riesgo de desajuste hídrico.";
+  } else if(osmTot < isoL){
+    riesgo = "La bebida favorece la hidratación y el vaciado gástrico, aunque puede aportar menos energía por unidad de volumen.";
+  } else {
+    riesgo = "La formulación se sitúa en un rango habitualmente bien tolerado y equilibrado entre aporte hídrico y energético.";
+  }
+
+  document.getElementById('osm').textContent = osmTot.toFixed(0) + " mOsm/L";
+  document.getElementById('pct').textContent = pctCHO.toFixed(2) + " %";
+  document.getElementById('gpl').textContent = Math.round(gPerL) + " g/L";
+  document.getElementById('osmCHO').textContent = osmCHO.toFixed(0) + " mOsm/L";
+  document.getElementById('osmNa').textContent = osmNa.toFixed(0) + " mOsm/L";
+  document.getElementById('risk').textContent = riesgo;
+  document.getElementById('methodUsed').textContent = methodUsed;
+  document.getElementById('kUsed').textContent = kUsed;
+
+  const badge = document.getElementById('badge');
+  badge.textContent = clasif;
+  badge.className = "badge " + color;
+}
+
+document.getElementById('mixPreset').addEventListener('change', function(){
+  syncPreset();
+  calcular();
+});
+
+document.addEventListener('input', calcular);
+
+syncPreset();
+calcular();
+</script>
+
+</body>
+</html>
