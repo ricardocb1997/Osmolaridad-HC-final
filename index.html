@@ -14,7 +14,6 @@
     --green:#1f8a70;
     --amber:#d4a106;
     --red:#b3261e;
-    --blue:#2563eb;
     --soft:#f9fafb;
   }
 
@@ -71,6 +70,7 @@
     align-items:center;
     gap:12px;
     margin-bottom:10px;
+    flex-wrap:wrap;
   }
 
   .section-title h2,
@@ -86,7 +86,7 @@
     margin-bottom:4px;
   }
 
-  input, select{
+  input{
     width:100%;
     padding:9px 10px;
     margin-top:4px;
@@ -96,6 +96,10 @@
     background:#fff;
     color:var(--text);
     font-size:0.95rem;
+  }
+
+  input[readonly]{
+    background:#f3f4f6;
   }
 
   .kpi{
@@ -132,7 +136,7 @@
     margin-top:14px;
     font-size:0.92rem;
     color:var(--muted);
-    line-height:1.5;
+    line-height:1.55;
   }
 
   .badge{
@@ -147,7 +151,6 @@
   .green{background:#d1fae5;color:#065f46;}
   .amber{background:#fef3c7;color:#92400e;}
   .red{background:#fee2e2;color:#7f1d1d;}
-  .blue{background:#dbeafe;color:#1d4ed8;}
 
   .toggle-wrap{
     display:flex;
@@ -166,6 +169,15 @@
     font-size:0.82rem;
     color:var(--muted);
     line-height:1.45;
+  }
+
+  .tip-list{
+    margin:8px 0 0 0;
+    padding-left:18px;
+  }
+
+  .tip-list li{
+    margin:4px 0;
   }
 </style>
 </head>
@@ -210,7 +222,7 @@
     </div>
 
     <div class="helper">
-      Este bloque define las demandas del contexto: duración, sudoración, carga térmica y objetivo de carbohidratos por hora.
+      Este bloque define las demandas del contexto: duración, sudoración, carga térmica y objetivo de carbohidratos por hora. El estrés térmico se estima a partir de <strong>temperatura y humedad</strong> como aproximación práctica.
     </div>
   </div>
 
@@ -278,6 +290,11 @@
       <div class="risk">
         <strong>Interpretación:</strong> <span id="drinkRisk">—</span>
       </div>
+
+      <div class="risk" id="drinkTipsWrap" style="margin-top:10px;">
+        <strong>Consejos prácticos:</strong>
+        <ul class="tip-list" id="drinkTips"></ul>
+      </div>
     </div>
 
   </div>
@@ -344,6 +361,16 @@ function isSyncOn(){
   return document.getElementById('syncMode').checked;
 }
 
+function setDrinkTips(items){
+  const ul = document.getElementById('drinkTips');
+  ul.innerHTML = '';
+  items.forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = item;
+    ul.appendChild(li);
+  });
+}
+
 function calcDrinkMetrics(){
   const gG = Math.max(0, v('glu'));
   const gF = Math.max(0, v('fru'));
@@ -380,24 +407,41 @@ function calcDrinkMetrics(){
 
   let clasif = "Isotónica";
   let color = "amber";
+  let riesgo = "";
+  let tips = [];
 
   if (osmTot < isoL){
     clasif = "Hipotónica";
     color = "green";
+    riesgo = "La formulación favorece la hidratación y el vaciado gástrico, aunque puede aportar menos energía por unidad de volumen.";
+    tips = [
+      "Es una opción útil cuando la prioridad principal es la reposición hídrica.",
+      "Puede ser especialmente interesante en calor, alta sudoración o fases donde se busca reducir la carga gastrointestinal.",
+      "Si el objetivo es aumentar el aporte energético, será necesario elevar la concentración de carbohidratos o complementar con otras fuentes."
+    ];
   } else if (osmTot > isoH){
     clasif = "Hipertónica";
     color = "red";
+    riesgo = "La bebida presenta una concentración elevada y puede aumentar el riesgo de vaciado gástrico lento o molestias gastrointestinales, especialmente si se utiliza como única fuente de hidratación.";
+    tips = [
+      "Puede ser útil cuando el objetivo es maximizar el aporte de carbohidratos por unidad de volumen.",
+      "Si la tolerancia digestiva es limitada, puede ser recomendable aumentar la ingesta de agua.",
+      "También puede ser útil desplazar parte del aporte de carbohidratos a geles u otras fuentes para reducir la osmolaridad de la bebida."
+    ];
+  } else {
+    clasif = "Isotónica";
+    color = "amber";
+    riesgo = "La bebida se sitúa en un rango habitualmente equilibrado entre aporte hídrico y aporte energético.";
+    tips = [
+      "Suele representar un buen compromiso entre hidratación, aporte energético y tolerancia gastrointestinal.",
+      "En muchos contextos puede funcionar como base de la estrategia nutricional durante el ejercicio.",
+      "Permite sostener la ingesta de carbohidratos sin penalizar en exceso el vaciado gástrico."
+    ];
   }
 
-  let riesgo = "";
-  if (osmTot > isoH){
-    riesgo = "La bebida presenta una concentración elevada y puede aumentar el riesgo de vaciado gástrico lento o molestias gastrointestinales, especialmente si se utiliza como única fuente de hidratación.";
-  } else if (osmTot < isoL && Na < 300){
+  if (osmTot < isoL && Na < 300){
     riesgo = "La bebida es muy diluida y con bajo contenido de sodio. En esfuerzos prolongados puede ser conveniente aumentar el sodio para mejorar el equilibrio hídrico.";
-  } else if (osmTot < isoL){
-    riesgo = "La formulación favorece la hidratación y el vaciado gástrico, aunque puede aportar menos energía por unidad de volumen.";
-  } else {
-    riesgo = "La bebida se sitúa en un rango habitualmente equilibrado entre aporte hídrico y aporte energético.";
+    tips.push("En esfuerzos largos o con mucha sudoración, conviene vigilar que el sodio no sea insuficiente.");
   }
 
   document.getElementById('osm').textContent = osmTot.toFixed(0) + " mOsm/L";
@@ -411,6 +455,8 @@ function calcDrinkMetrics(){
   const badge = document.getElementById('drinkBadge');
   badge.textContent = clasif;
   badge.className = "badge " + color;
+
+  setDrinkTips(tips);
 
   return {
     gTotal,
@@ -445,12 +491,12 @@ function heatRiskLabel(hiC){
     return {label:"Bajo estrés térmico", color:"green"};
   }
   if (hiC < 32.2){
-    return {label:"Precaución", color:"amber"};
+    return {label:"Precaución por estrés térmico", color:"amber"};
   }
   if (hiC < 40.6){
-    return {label:"Precaución alta", color:"amber"};
+    return {label:"Estrés térmico alto", color:"amber"};
   }
-  return {label:"Peligro", color:"red"};
+  return {label:"Estrés térmico muy alto", color:"red"};
 }
 
 function dehydStatus(pct){
@@ -472,7 +518,7 @@ function dehydStatus(pct){
     label:"Riesgo para la salud",
     color:"red",
     text:"La pérdida estimada es alta y justifica una lectura conservadora, especialmente si coincide con calor, síntomas o recuperación limitada."
-  };
+    };
 }
 
 function calcPlan(){
