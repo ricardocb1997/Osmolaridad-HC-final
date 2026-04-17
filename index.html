@@ -4,7 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Calculadora de Osmolaridad</title>
-
 <style>
   :root{
     --bg:#f5f7fa;
@@ -15,6 +14,7 @@
     --green:#1f8a70;
     --amber:#d4a106;
     --red:#b3261e;
+    --blue:#2563eb;
     --soft:#f9fafb;
   }
 
@@ -28,19 +28,13 @@
   }
 
   .wrap{
-    max-width:980px;
+    max-width:1040px;
     margin:20px auto;
     padding:10px;
   }
 
-  .grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:16px;
-  }
-
-  @media (max-width: 760px){
-    .grid{grid-template-columns:1fr;}
+  .section{
+    margin-bottom:16px;
   }
 
   .card{
@@ -49,6 +43,40 @@
     border-radius:14px;
     padding:18px;
     box-shadow:0 4px 14px rgba(15,23,42,0.04);
+  }
+
+  .grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+
+  .row{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+  }
+
+  @media (max-width: 820px){
+    .grid-2{grid-template-columns:1fr;}
+  }
+
+  @media (max-width: 620px){
+    .row{grid-template-columns:1fr;}
+  }
+
+  .section-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:10px;
+  }
+
+  .section-title h2,
+  .section-title h3{
+    margin:0;
+    font-size:1rem;
   }
 
   label{
@@ -70,16 +98,6 @@
     font-size:0.95rem;
   }
 
-  .row{
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr;
-    gap:10px;
-  }
-
-  @media (max-width: 620px){
-    .row{grid-template-columns:1fr;}
-  }
-
   .kpi{
     display:flex;
     justify-content:space-between;
@@ -91,26 +109,6 @@
   .kpi span:last-child{
     font-weight:600;
     text-align:right;
-  }
-
-  .badge{
-    padding:5px 10px;
-    border-radius:999px;
-    font-weight:600;
-    font-size:0.88rem;
-  }
-
-  .green{background:#d1fae5;color:#065f46;}
-  .amber{background:#fef3c7;color:#92400e;}
-  .red{background:#fee2e2;color:#7f1d1d;}
-  .blue{background:#dbeafe;color:#1d4ed8;}
-
-  .section-title{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    margin-bottom:10px;
   }
 
   .divider{
@@ -137,28 +135,94 @@
     line-height:1.5;
   }
 
-  .block-title{
-    font-size:1rem;
-    font-weight:700;
-    margin:0 0 10px 0;
+  .badge{
+    padding:5px 10px;
+    border-radius:999px;
+    font-weight:600;
+    font-size:0.88rem;
+    display:inline-block;
+    white-space:nowrap;
+  }
+
+  .green{background:#d1fae5;color:#065f46;}
+  .amber{background:#fef3c7;color:#92400e;}
+  .red{background:#fee2e2;color:#7f1d1d;}
+  .blue{background:#dbeafe;color:#1d4ed8;}
+
+  .toggle-wrap{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:0.9rem;
+    color:var(--muted);
+  }
+
+  .toggle-wrap input{
+    width:auto;
+    margin:0;
   }
 
   .small{
-    font-size:0.92rem;
-    line-height:1.5;
+    font-size:0.82rem;
     color:var(--muted);
+    line-height:1.45;
   }
 </style>
 </head>
-
 <body>
-
 <div class="wrap">
 
-  <!-- BLOQUE 1: OSMOLARIDAD -->
-  <div class="grid">
+  <!-- 1. CONTEXTO -->
+  <div class="section card">
+    <div class="section-title">
+      <h2>1. Contexto del deportista</h2>
+      <span id="heatBadge" class="badge green">Bajo estrés térmico</span>
+    </div>
 
+    <div class="row">
+      <div>
+        <label>Peso del deportista (kg)</label>
+        <input type="number" id="bodyMass" value="70" min="30" step="0.1">
+      </div>
+      <div>
+        <label>Duración prevista (h)</label>
+        <input type="number" id="duration" value="3" min="0.5" step="0.1">
+      </div>
+      <div>
+        <label>Tasa de sudoración (L/h)</label>
+        <input type="number" id="sweat" value="1.0" min="0.2" step="0.1">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Temperatura ambiente (°C)</label>
+        <input type="number" id="tempC" value="20" min="-5" step="0.5">
+      </div>
+      <div>
+        <label>Humedad relativa (%)</label>
+        <input type="number" id="rh" value="50" min="0" max="100" step="1">
+      </div>
+      <div>
+        <label>Objetivo de carbohidratos (g/h)</label>
+        <input type="number" id="targetCho" value="90" min="0" step="1">
+      </div>
+    </div>
+
+    <div class="helper">
+      Este bloque define las demandas del contexto: duración, sudoración, carga térmica y objetivo de carbohidratos por hora.
+    </div>
+  </div>
+
+  <!-- 2 + 3 -->
+  <div class="section grid-2">
+
+    <!-- 2. FORMULACIÓN -->
     <div class="card">
+      <div class="section-title">
+        <h3>2. Formulación de la bebida</h3>
+      </div>
+
       <div class="row">
         <div>
           <label>Glucosa (g)</label>
@@ -190,14 +254,15 @@
       </div>
 
       <div class="helper">
-        Introduce la composición final de la bebida. La calculadora estima automáticamente la <strong>k efectiva de la mezcla</strong> a partir del tipo y proporción de carbohidratos, sin necesidad de ajustes manuales.
+        Introduce la composición final de la bebida. La herramienta calcula automáticamente la <strong>k efectiva de la mezcla</strong> a partir del tipo y proporción de carbohidratos.
       </div>
     </div>
 
+    <!-- 3. RESULTADO DE LA BEBIDA -->
     <div class="card">
       <div class="section-title">
-        <strong>Resultados de la bebida</strong>
-        <span id="badge" class="badge amber">Isotónica</span>
+        <h3>3. Resultado de la bebida</h3>
+        <span id="drinkBadge" class="badge amber">Isotónica</span>
       </div>
 
       <div class="kpi"><span>Osmolaridad total</span><span id="osm">—</span></div>
@@ -211,28 +276,19 @@
       <div class="kpi"><span>k efectiva de la mezcla</span><span id="kEff">—</span></div>
 
       <div class="risk">
-        <strong>Interpretación:</strong> <span id="risk">—</span>
+        <strong>Interpretación:</strong> <span id="drinkRisk">—</span>
       </div>
     </div>
 
   </div>
 
-  <!-- BLOQUE 2: PLAN POR HORA / HIDRATACIÓN -->
-  <div class="card" style="margin-top:16px;">
-    <div class="block-title">Plan por hora: hidratación + carbohidratos</div>
-
-    <div class="row">
-      <div>
-        <label>Tasa de sudoración (L/h)</label>
-        <input type="number" id="sweat" value="1.0" min="0.2" step="0.1">
-      </div>
-      <div>
-        <label>Objetivo CHO (g/h)</label>
-        <input type="number" id="targetCho" value="90" min="0" step="5">
-      </div>
-      <div>
-        <label>Bebida ingerida (L/h)</label>
-        <input type="number" id="drinkLph" value="1.0" min="0.2" step="0.1">
+  <!-- 4. APLICACIÓN PRÁCTICA -->
+  <div class="section card">
+    <div class="section-title">
+      <h2>4. Aplicación práctica</h2>
+      <div class="toggle-wrap">
+        <input type="checkbox" id="syncMode" checked>
+        <label for="syncMode" style="margin:0;">Usar bebida como base</label>
       </div>
     </div>
 
@@ -242,40 +298,34 @@
         <input type="number" id="drinkShare" value="100" min="0" max="100" step="5">
       </div>
       <div>
+        <label>Bebida ingerida (L/h)</label>
+        <input type="number" id="drinkLph" value="1.0" min="0.1" step="0.1">
+      </div>
+      <div>
         <label>Sodio de la bebida (mg/L)</label>
         <input type="number" id="naPlan" value="500" min="0" step="25">
-      </div>
-      <div>
-        <label>Temperatura ambiente (°C)</label>
-        <input type="number" id="tempC" value="20" min="-5" step="0.5">
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <label>Humedad relativa (%)</label>
-        <input type="number" id="rh" value="50" min="0" max="100" step="1">
-      </div>
-      <div>
-        <label>Clasificación térmica</label>
-        <div id="heatBadgeWrap" style="padding-top:6px;">
-          <span id="heatBadge" class="badge green">Bajo</span>
-        </div>
-      </div>
-      <div>
-        <label>Recomendación de líquido (L/h)</label>
-        <div id="recDrink" style="padding-top:8px;font-weight:600;">—</div>
       </div>
     </div>
 
     <div class="divider"></div>
 
     <div class="kpi"><span>CHO desde bebida</span><span id="planChoDrink">—</span></div>
-    <div class="kpi"><span>Concentración resultante</span><span id="planConc">—</span></div>
-    <div class="kpi"><span>Osmolaridad estimada de la bebida</span><span id="planOsm">—</span></div>
+    <div class="kpi"><span>Concentración resultante de la bebida</span><span id="planConc">—</span></div>
+    <div class="kpi"><span>Osmolaridad estimada en uso</span><span id="planOsm">—</span></div>
+    <div class="kpi"><span>Pérdida total por sudor</span><span id="totalSweatLoss">—</span></div>
+    <div class="kpi"><span>Déficit hídrico total estimado</span><span id="netFluidDeficit">—</span></div>
+    <div class="kpi"><span>% de deshidratación estimado</span><span id="dehydPct">—</span></div>
+
+    <div class="divider"></div>
+
+    <div class="kpi"><span>Lectura práctica</span><span id="dehydBadge" class="badge green">Funcional</span></div>
 
     <div class="risk">
       <strong>Evaluación del plan:</strong> <span id="planRisk">—</span>
+    </div>
+
+    <div class="helper">
+      En modo <strong>Usar bebida como base</strong>, el bloque se sincroniza con la formulación superior. Si lo desactivas, puedes simular estrategias distintas manteniendo la bebida como referencia.
     </div>
   </div>
 
@@ -284,6 +334,14 @@
 <script>
 function v(id){
   return parseFloat(document.getElementById(id).value) || 0;
+}
+
+function setVal(id, value){
+  document.getElementById(id).value = value;
+}
+
+function isSyncOn(){
+  return document.getElementById('syncMode').checked;
 }
 
 function calcDrinkMetrics(){
@@ -348,13 +406,29 @@ function calcDrinkMetrics(){
   document.getElementById('osmCHO').textContent = osmCHO.toFixed(0) + " mOsm/L";
   document.getElementById('osmNa').textContent = osmNa.toFixed(0) + " mOsm/L";
   document.getElementById('kEff').textContent = gTotal > 0 ? kEff.toFixed(1) : "—";
-  document.getElementById('risk').textContent = riesgo;
+  document.getElementById('drinkRisk').textContent = riesgo;
 
-  const badge = document.getElementById('badge');
+  const badge = document.getElementById('drinkBadge');
   badge.textContent = clasif;
   badge.className = "badge " + color;
 
-  return {kEff, isoL, isoH};
+  return {
+    gTotal,
+    gPerL,
+    pctCHO,
+    Na,
+    V,
+    kEff,
+    isoL,
+    isoH
+  };
+}
+
+function syncDrinkToPlan(metrics){
+  if (!isSyncOn()) return;
+  setVal('targetCho', Math.round(metrics.gTotal));
+  setVal('naPlan', Math.round(metrics.Na));
+  setVal('drinkLph', Number(metrics.V).toFixed(1));
 }
 
 function heatIndexC(Tc, RH){
@@ -367,75 +441,131 @@ function heatIndexC(Tc, RH){
 }
 
 function heatRiskLabel(hiC){
-  if (hiC < 26.7) return {label: "Bajo", color:"green", factor: 0.00};
-  if (hiC < 32.2) return {label: "Precaución", color:"amber", factor: 0.10};
-  if (hiC < 40.6) return {label: "Precaución extrema", color:"amber", factor: 0.15};
-  if (hiC < 54.4) return {label: "Peligro", color:"red", factor: 0.20};
-  return {label: "Peligro extremo", color:"red", factor: 0.25};
+  if (hiC < 26.7){
+    return {label:"Bajo estrés térmico", color:"green"};
+  }
+  if (hiC < 32.2){
+    return {label:"Precaución", color:"amber"};
+  }
+  if (hiC < 40.6){
+    return {label:"Precaución alta", color:"amber"};
+  }
+  return {label:"Peligro", color:"red"};
+}
+
+function dehydStatus(pct){
+  if (pct < 2){
+    return {
+      label:"Funcional",
+      color:"green",
+      text:"La pérdida estimada se mantiene en un rango habitualmente tolerable."
+    };
+  }
+  if (pct < 5){
+    return {
+      label:"Riesgo para el rendimiento",
+      color:"amber",
+      text:"La pérdida estimada entra en un rango donde es más probable observar deterioro del rendimiento y mayor estrés fisiológico."
+    };
+  }
+  return {
+    label:"Riesgo para la salud",
+    color:"red",
+    text:"La pérdida estimada es alta y justifica una lectura conservadora, especialmente si coincide con calor, síntomas o recuperación limitada."
+  };
 }
 
 function calcPlan(){
-  const {kEff, isoL, isoH} = calcDrinkMetrics();
+  const metrics = calcDrinkMetrics();
+  syncDrinkToPlan(metrics);
 
+  const bodyMass = Math.max(30, v('bodyMass'));
+  const duration = Math.max(0.1, v('duration'));
   const sweat = Math.max(0, v('sweat'));
   const target = Math.max(0, v('targetCho'));
   const drinkL = Math.max(0.1, v('drinkLph'));
-  const share = Math.min(100, Math.max(0, v('drinkShare')));
-  const naL = Math.max(0, v('naPlan'));
-  const Tc = v('tempC');
-  const RH = Math.min(100, Math.max(0, v('rh')));
+  const share  = Math.min(100, Math.max(0, v('drinkShare')));
+  const naL    = Math.max(0, v('naPlan'));
+  const tempC  = v('tempC');
+  const rh     = Math.min(100, Math.max(0, v('rh')));
 
-  const hiC = heatIndexC(Tc, RH);
-  const heat = heatRiskLabel(hiC);
-
-  const choDrink = target * (share / 100);
-  const gPerL = choDrink / drinkL;
-  const pctCHO = gPerL / 10;
-  const osmCHO = pctCHO * kEff;
-  const osmNa = 2 * (naL / 23);
-  const osmTot = osmCHO + osmNa;
-
-  let clasif = "Isotónica";
-  if (osmTot < isoL) clasif = "Hipotónica";
-  else if (osmTot > isoH) clasif = "Hipertónica";
-
-  const recDrink = sweat * (1 + heat.factor);
-
+  const heat = heatRiskLabel(heatIndexC(tempC, rh));
   const heatBadge = document.getElementById('heatBadge');
   heatBadge.textContent = heat.label;
   heatBadge.className = "badge " + heat.color;
 
-  document.getElementById('recDrink').textContent = recDrink.toFixed(2) + " L/h";
+  const choDrink = target * (share / 100);
+  const gPerLPlan = choDrink / drinkL;
+  const pctCHOPlan = gPerLPlan / 10;
+  const osmCHOPlan = pctCHOPlan * metrics.kEff;
+  const osmNaPlan = 2 * (naL / 23);
+  const osmTotPlan = osmCHOPlan + osmNaPlan;
+
+  let clasifPlan = "Isotónica";
+  if (osmTotPlan < metrics.isoL) clasifPlan = "Hipotónica";
+  else if (osmTotPlan > metrics.isoH) clasifPlan = "Hipertónica";
+
+  const totalSweatLoss = sweat * duration;
+  const totalIntake = drinkL * duration;
+  const netFluidDeficit = Math.max(0, totalSweatLoss - totalIntake);
+  const dehydPct = (netFluidDeficit / bodyMass) * 100;
+
+  const ds = dehydStatus(dehydPct);
+
   document.getElementById('planChoDrink').textContent = choDrink.toFixed(0) + " g/h";
-  document.getElementById('planConc').textContent = Math.round(gPerL) + " g/L (" + pctCHO.toFixed(2) + " %)";
-  document.getElementById('planOsm').textContent = osmTot.toFixed(0) + " mOsm/L → " + clasif;
+  document.getElementById('planConc').textContent = Math.round(gPerLPlan) + " g/L (" + pctCHOPlan.toFixed(2) + " %)";
+  document.getElementById('planOsm').textContent = osmTotPlan.toFixed(0) + " mOsm/L → " + clasifPlan;
+  document.getElementById('totalSweatLoss').textContent = totalSweatLoss.toFixed(2) + " L";
+  document.getElementById('netFluidDeficit').textContent = netFluidDeficit.toFixed(2) + " L";
+  document.getElementById('dehydPct').textContent = dehydPct.toFixed(2) + " %";
 
-  let msgs = [];
+  const dehydBadge = document.getElementById('dehydBadge');
+  dehydBadge.textContent = ds.label;
+  dehydBadge.className = "badge " + ds.color;
 
-  if (drinkL > sweat + 0.2) msgs.push("la ingesta de líquido puede ser alta en relación con la sudoración estimada");
-  if (drinkL < sweat - 0.2) msgs.push("la ingesta de líquido puede ser insuficiente respecto a la sudoración estimada");
-  if (drinkL < recDrink - 0.1) msgs.push("el contexto térmico sugiere una reposición hídrica algo mayor");
-  if (pctCHO > 8 && kEff >= 40) msgs.push("la concentración de carbohidratos puede aumentar el riesgo de malestar gastrointestinal");
-  if ((sweat >= 0.9 || heat.factor >= 0.15) && naL < 600) msgs.push("podría ser razonable aumentar el sodio de la bebida");
+  let extra = [];
 
-  let text = "";
-  if (msgs.length === 0){
-    text = "El planteamiento es razonablemente coherente entre aporte hídrico, aporte energético y tolerancia gastrointestinal.";
-  } else {
-    text = "Conviene revisar el plan porque " + msgs.join("; ") + ".";
+  if (pctCHOPlan > 8 && metrics.kEff >= 40){
+    extra.push("la concentración resultante de carbohidratos puede aumentar el riesgo de malestar gastrointestinal");
+  }
+  if (drinkL < sweat){
+    extra.push("la reposición de líquido es inferior a la sudoración estimada");
+  }
+  if (drinkL > sweat + 0.3){
+    extra.push("la reposición de líquido es relativamente alta frente a la sudoración estimada");
+  }
+  if (share < 100){
+    extra.push("parte del objetivo de carbohidratos deberá cubrirse con otras fuentes distintas a la bebida");
+  }
+
+  let text = ds.text;
+  if (extra.length){
+    text += " Además, conviene revisar el plan porque " + extra.join("; ") + ".";
   }
 
   document.getElementById('planRisk').textContent = text;
 }
 
+function setManualFieldsState(){
+  const disabled = isSyncOn();
+  document.getElementById('targetCho').readOnly = disabled;
+  document.getElementById('naPlan').readOnly = disabled;
+  document.getElementById('drinkLph').readOnly = disabled;
+
+  const bg = disabled ? "#f3f4f6" : "#fff";
+  document.getElementById('targetCho').style.background = bg;
+  document.getElementById('naPlan').style.background = bg;
+  document.getElementById('drinkLph').style.background = bg;
+}
+
 function updateAll(){
-  calcDrinkMetrics();
+  setManualFieldsState();
   calcPlan();
 }
 
+document.getElementById('syncMode').addEventListener('change', updateAll);
 document.addEventListener('input', updateAll);
 updateAll();
 </script>
-
 </body>
 </html>
